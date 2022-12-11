@@ -1,0 +1,245 @@
+////
+   Licensed to the Apache Software Foundation (ASF) under one
+   or more contributor license agreements.  See the NOTICE file
+   distributed with this work for additional information
+   regarding copyright ownership.  The ASF licenses this file
+   to you under the Apache License, Version 2.0 (the
+   "License"); you may not use this file except in compliance
+   with the License.  You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing,
+   software distributed under the License is distributed on an
+   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+   KIND, either express or implied.  See the License for the
+   specific language governing permissions and limitations
+   under the License.
+////
+= Making a release
+:jbake-type: page
+:jbake-tags: maven
+:jbake-status: published
+:idprefix:
+
+## Release Preparation
+
+- Elect a release manager.
+- Create a ticket for a new release in JIRA. If you do not have permission to do so just ask to be given permissions on the mailing list.
+- Review all of the JIRA issues associated with the release. All issues should be resolved and closed.
+- Any issues assigned to the release that are not complete should be assigned to the next release. Any critical or blocker issues should be resolved on the mailing list. Discuss any issues that you are unsure of on the mailing list.
+
+## Steps for the Release Manager
+
+The following steps need only to be performed once.
+
+- Make sure you have your PGP key entered into https://id.apache.org/.
+  Your KEYS will then be present in https://people.apache.org/keys/group/opennlp.asc.
+- Make sure you have your PGP keys password.
+- Add your PGP key to the KEYS file:
+----
+Examples of adding your key to this file:
+ pgp -kxa <your name> and append it to this file.
+ (pgpk -ll <your name> && pgpk -xa <your name>) >> this file.
+ (gpg --list-sigs <your name>
+     && gpg --armor --export <your name>) >> this file.
+----
+- In a local temp folder, svn checkout the OpenNLP artifacts and update the KEYS file
+----
+svn co https://dist.apache.org/repos/dist/release/opennlp/
+svn commit -m"Added Key for <name>" KEYS
+----
+- Create a maven `settings.xml` to publish to `repository.apache.org`. An example configuration:
+
+----
+<server>
+  <id>apache.releases.https</id>
+  <username>Your Apache Username</username>
+  <password>Your Apache Password</password>
+</server>
+----
+
+## Release Steps
+
+- Checkout the Apache OpenNLP master branch: `git clone git@github.com:apache/opennlp.git`
+- Execute a complete test (it can take several hours): `mvn test -DOPENNLP_DATA_DIR=/path/to/opennlp-test-data/ -Peval-tests`
+- Do a trial build: `mvn package -Papache-release`
+- Prepare the release: `mvn release:prepare` Answer the questions appropriately. The tag name format should be *opennlp-x.y.z*.
+This command creates and pushes two new commits to the repository to reflect the version changes. It also tags the release.
+
+### Successful Maven Release Preparation
+
+#### Perform the Release
+
+Perform the release: `mvn release:perform`
+
+This creates a staged repository at http://repository.apache.org.
+Check the staged repository and if all looks well, close the staging repository but do *not* promote or release it at this time.
+The build results are in `opennlp/target/checkout/target`. Do not modify or delete these files.
+
+#### Check the Release Artifacts
+
+Perform basic checks against the release binary:
+
+- Check signature of generated artifacts.
+- Check presence and appropriateness of `LICENSE`, `NOTICE`, and `README` files.
+
+#### Create a VOTE Thread
+
+- Notify the developer mailing list of a new version vote. Be sure to replace all values in `[]` with the appropriate values.
+
+Message Subject: [VOTE] Apache OpenNLP [version] Release Candidate
+
+----
+Hi folks,
+
+I have posted a [Nth] release candidate for the Apache OpenNLP [version] release and it is ready for testing.
+
+The distributables can be downloaded from:
+https://repository.apache.org/content/repositories/orgapacheopennlp-[REPO_NUM]/org/apache/opennlp/opennlp-distr/[VERSION]/
+
+The release was made from the Apache OpenNLP [VERSION] tag at:
+https://github.com/apache/opennlp/tree/opennlp-[VERSION]
+
+To use it in a maven build set the version for opennlp-tools or opennlp-uima to [VERSION] and add the following URL to your settings.xml file:
+https://repository.apache.org/content/repositories/orgapacheopennlp-[REPO_NUM]
+
+The release was made using the OpenNLP release process, documented on the website:
+https://opennlp.apache.org/release.html
+
+Please vote on releasing these packages as Apache OpenNLP [VERSION]. The vote is open for at least the next 72 hours.
+
+Only votes from OpenNLP PMC are binding, but everyone is welcome to check the release candidate and vote.
+The vote passes if at least three binding +1 votes are cast.
+
+[ ] +1 Release the packages as Apache OpenNLP [VERSION]
+[ ] -1 Do not release the packages because...
+
+Thanks!
+----
+
+## After a Successful Vote
+
+The vote is successful if at least 3 +1 votes are received from OpenNLP PMC members after a minimum of 72 hours of sending the vote email.
+Acknowledge the voting results on the mailing list in the VOTE thread.
+
+### Release Nexus Staging Repository
+
+Release the staging repository. This will make the artifacts available in the Maven Central repository.
+To do this go to the http://repository.apache.org[repository server], log in, go to the staging area and release the staging repository linked to this release
+
+### Commit Distribution to SVN
+
+Commit the distribution via SVN to https://dist.apache.org/repos/dist/release:
+
+----
+svn co https://dist.apache.org/repos/dist/release/opennlp/ dist
+# check if the KEYS file contains your key, if not, update it
+# copy opennlp/target/checkout/target/apache-opennlp* to dist/opennlp-<VERSION>
+svn commit --username <username> -m "Adding OpenNLP <version>"
+----
+
+### Delete Old Release(s)
+
+To reduce the load on the ASF mirrors, projects are required to delete old releases (see http://www.apache.org/legal/release-policy.html#when-to-archive).
+
+Remove the old releases from SVN under https://dist.apache.org/repos/dist/release/opennlp/.
+
+### Update the Website
+
+Update the website once the new version appears in the Apache download mirrors (keep checking http://www.apache.org/dyn/closer.cgi/opennlp until you see something):
+
+#### Update jbake.properties
+
+Update the `jbake.properties` file to include the new version numbers:
+
+```
+opennlp.version=
+opennlp.next.version=
+```
+
+#### Add New Artifact Item
+
+Add a new artifactItem in the pom.xml for the new OpenNLP release. (This automatically pulls in the details and javadocs for the new version when the site is built.):
+
+[source,xml,indent=0,subs=attributes+]
+----
+<artifactItem>
+  <groupId>org.apache.opennlp</groupId>
+  <artifactId>opennlp-distr</artifactId>
+  [version]${project.version}</version>
+  <overWrite>false</overWrite>
+  <type>zip</type>
+  <classifier>bin</classifier>
+  <outputDirectory>${project.build.directory}/distr/1.8.1</outputDirectory>
+</artifactItem>
+----
+
+#### Update Documentation Links
+
+Move the last version's links to the documentation to the Legacy Documentation (https://opennlp.apache.org/docs/legacy.html) page. Add the following lines at the beginning of `docs/legacy.ad`:
+
+----
+### Apache OpenNLP ${previous.release} documentation
+* link:/docs/${previous.release}/manual/opennlp.html[Apache OpenNLP Manual]
+* link:/docs/${previous.release}/apidocs/opennlp-tools/index.html[Apache OpenNLP Tools Javadoc]
+* link:/docs/${previous.release}/apidocs/opennlp-uima/index.html[Apache OpenNLP UIMA Javadoc]
+* link:/docs/${previous.release}/apidocs/opennlp-brat-annotator/index.html[Apache OpenNLP BRAT Annotator Javadoc]
+* link:/docs/${previous.release}/apidocs/opennlp-morfologik-addon/index.html[Apache OpenNLP Morfologik Addon Javadoc]
+----
+
+#### Update doap_opennlp.rdf
+
+- Update the `doap_opennlp.rdf` file to reflect the new version number and release date.
+
+#### Add News Item
+
+- Add a news item in `news/release-{xyz}.ad` by copying the content from OpenNLP project `opennlp-distr/src/README`.
+
+#### Commit Website Changes.
+
+- Commit the website changes.
+- Rebuild opennlp-site and redeploy the site (if Automatic Buildbot doesn't kick in)
+- Test and review the website. Test that all download links are working. Test that the documentation is updated and can be viewed
+
+### Post-Release Steps
+
+- Log the new version at https://reporter.apache.org/addrelease.html?opennlp.
+- Announce the new version on the OpenNLP Twitter.
+- Announce the new version on the Apache OpenNLP blog at https://blogs.apache.org/opennlp/.
+- Close the present release ticket in JIRA.
+- Send announcement email to announce@apache.org, dev@opennlp.apache.org, users@opennlp.apache.org. This needs to be done from your @apache.org email address or the email will bounce from the announce list. Gmail forwarding can help here and is a snap to set up (http://gmailblog.blogspot.com/2009/07/send-mail-from-another-address-without.html). It's even easier then the instructions there as it will recognize your email address and default to Apache settings. It is important to include a description of what OpenNLP is as well as a link to the updated DOAP within the release announcement, this is so others know what OpenNLP is.
+
+----
+Title: [ANNOUNCE] OpenNLP <version> released
+TO: announce@apache.org, users@opennlp.apache.org, dev@opennlp.apache.org
+----
+
+Message body:
+
+----
+The Apache OpenNLP team is pleased to announce the release of version <version> of Apache OpenNLP. The Apache OpenNLP library is a machine learning based toolkit for the processing of natural language text. It supports the most common NLP tasks, such as tokenization, sentence segmentation, part-of-speech tagging, named entity extraction, chunking, and parsing.
+The OpenNLP <version> binary and source distributions are available for download from our download page: https://opennlp.apache.org/download.html
+The OpenNLP library is distributed by Maven Central as well. See the Maven Dependency page for more details: http://opennlp.apache.org/maven-dependency.html
+
+Changes in this version:
+
+**  TODO UPDATE THIS >>
+- change 1
+- change 2
+<<  TODO UPDATE THIS **
+
+For a complete list of fixed bugs and improvements please see the RELEASE_NOTES file included in the distribution.
+
+The Apache OpenNLP Team
+----
+
+## After an Unsuccessful Vote
+
+The release vote may fail due to an issue discovered in the release candidate. If the vote fails the release should be canceled by:
+
+- Sending an email to dev@opennlp.apache.org on the VOTE thread notifying of the vote's cancellation.
+- Dropping the staging repository at https://repository.apache.org/.
+- Renaming the `opennlp-x.y.x` tag to `opennlp-x.y.z-RC1`.
+
+A new release candidate can now be prepared. When complete, a new VOTE thread can be started as described in the steps above.

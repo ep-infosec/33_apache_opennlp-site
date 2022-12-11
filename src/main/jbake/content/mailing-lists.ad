@@ -1,0 +1,54 @@
+////
+   Licensed to the Apache Software Foundation (ASF) under one
+   or more contributor license agreements.  See the NOTICE file
+   distributed with this work for additional information
+   regarding copyright ownership.  The ASF licenses this file
+   to you under the Apache License, Version 2.0 (the
+   "License"); you may not use this file except in compliance
+   with the License.  You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing,
+   software distributed under the License is distributed on an
+   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+   KIND, either express or implied.  See the License for the
+   specific language governing permissions and limitations
+   under the License.   
+////
+= Mailing Lists
+:jbake-type: page
+:jbake-tags: maven
+:jbake-status: published
+:idprefix:
+
+[cols="3,3,3,3,3"]
+|===
+|Mailing List |Purpose |Subscribe |Unsubscribe |Archives
+
+|Users Mailing List
+|This list is the general users mailing list and is for posting most, if not all, relevant questions. If you are trying to decide which list, opennlp-dev or opennlp-users, post here first. Someone will kindly suggest you post to opennlp-dev if it is more appropriate there.
+|mailto:users-subscribe@opennlp.apache.org[Subscribe]
+|mailto:users-unsubscribe@opennlp.apache.org[Unsubscribe]
+|link:++https://lists.apache.org/list.html?users@opennlp.apache.org++[Archives]
+
+|Developers Mailing List
+|This list is for development discussions, patch suggestions, and current issues posted
+to the issue tracker for the project.
+|mailto:dev-subscribe@opennlp.apache.org[Subscribe]
+|mailto:dev-unsubscribe@opennlp.apache.org[Unsubscribe]
+|link:++https://lists.apache.org/list.html?dev@opennlp.apache.org++[Archives]
+
+|Commits Mailing List
+|This list follows changes to the project. This list is _not_ for questions. This list is used by svn to post changes to the project. If you have questions about any content here, post them to the opennlp-dev list above.
+|mailto:commits-subscribe@opennlp.apache.org[Subscribe]
+|mailto:commits-unsubscribe@opennlp.apache.org[Unsubscribe]
+|link:++https://lists.apache.org/list.html?commits@opennlp.apache.org++[Archives]
+
+|Issues Mailing List
+|This list follows changes and posts to JIRA, the projects bug tracking system.  If you have any
+issues please post them to the JIRA pages and not to this list. This list is mainly for developers to keep track of changes and issues to be resolved; however, any changes should be posted to the JIRA pages and _not_ _directly_ to this mailing list.
+|mailto:issues-subscribe@opennlp.apache.org[Subscribe]
+|mailto:issues-unsubscribe@opennlp.apache.org[Unsubscribe]
+|link:++https://lists.apache.org/list.html?issues@opennlp.apache.org++[Archives]
+|===
